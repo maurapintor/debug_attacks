@@ -134,7 +134,11 @@ def zero_gradients_indicator(grad_norm: np.ndarray, zero_index: int, threshold: 
     :rtype: float
     """
     how_many = zero_index if zero_index >= 0 else len(grad_norm)
-    return (grad_norm[:how_many] <= threshold).mean()
+    g = (grad_norm[:how_many] <= threshold)
+    if len(g) == 0:
+        return 0
+    else:
+        return g.mean()
 
 
 def compute_indicators(attack, x, y, clf, transfer_clf=None,
