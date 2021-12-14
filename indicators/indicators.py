@@ -150,7 +150,7 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
 
     scores_path = clf.decision_function(attack.x_seq).tondarray()
 
-    if transfer_clf is None:
+    if transfer_clf is not None:
         transfer_scores = transfer_clf.predict(adv_ds.X)
     else:
         transfer_scores = scores_path
