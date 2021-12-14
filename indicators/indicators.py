@@ -153,7 +153,7 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
     if transfer_clf is not None:
         transfer_scores = transfer_clf.predict(adv_ds.X)
     else:
-        transfer_scores = scores_path
+        transfer_scores = None
 
     y_target = attack.y_target
 
