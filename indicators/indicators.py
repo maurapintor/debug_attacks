@@ -67,10 +67,11 @@ def silent_success_indicator(loss: np.array, scores: np.ndarray, y0: int, y_targ
         scores_success = np.argmax(scores, axis=1) != y0
     else:
         scores_success = np.argmax(scores, axis=1) == y_target
-    zero_index = np.argmax(scores_success)
-    adv_ratio = (zero_index / loss.shape[0]) if zero_index >= 0 else 1
+    success_in_path = np.any(scores_success)
+
+    success_in_path = success_in_path and scores_success[-1] is False
     attack_success = adv_y != y0 if y_target is None else adv_y == y_target
-    silent_success = adv_ratio < 1 and not attack_success
+    silent_success = success_in_path and not attack_success
     return silent_success
 
 
