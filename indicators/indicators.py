@@ -151,8 +151,9 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
     scores_path = clf.decision_function(attack.x_seq).tondarray()
 
     if transfer_clf is None:
-        transfer_clf = clf
-    transfer_scores = transfer_clf.predict(adv_ds.X)
+        transfer_scores = transfer_clf.predict(adv_ds.X)
+    else:
+        transfer_scores = scores_path
 
     y_target = attack.y_target
 
@@ -191,9 +192,12 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
                 y_pred_r = clf.predict(adv_ds_r.X)
             restart_label_results.append(y_pred_r)
 
-    bad_init_value = bad_init_indicator(y_real=y_real, y_pred=y_adv,
-                                        y_adv=restart_label_results,
-                                        y_target=y_target) if n_restarts is not None else False
+    if n_restarts > 0:
+        bad_init_value = bad_init_indicator(y_real=y_real, y_pred=y_adv,
+                                            y_adv=restart_label_results,
+                                            y_target=y_target) if n_restarts is not None else False
+    else:
+        bad_init_value = 0
     zero_grads = zero_gradients_indicator(grad_norms, zero_index)
     transfer_failure = transfer_failure_indicator(transfer_scores, y_adv) \
         if transfer_scores is not None else False
@@ -205,15 +209,18 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
     else:
         attack_failed = attack_failed and not transfer_failure
 
-    df = pd.DataFrame(data={
+    data = {
         'Attack Success': 0.0 if attack_failed else 1.0,
         'Silent Success': 1.0 if silent_success else 0.0,
         'Break-point Angle': break_point_angle,
         'Increasing Loss': increasing_loss,
         'Zero Gradients': zero_grads,
-        'Bad Initialization': bad_init_value,
-        'Transfer Failure': transfer_failure,
-    }, index=[0])
+    }
+    if transfer_clf is not None:
+        data.update({'Transfer Failure': transfer_failure, })
+    if n_restarts > 0:
+        data.update({'Bad Initialization': bad_init_value, })
+    df = pd.DataFrame(data=data, index=[0])
 
     return df
 
