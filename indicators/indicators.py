@@ -192,7 +192,6 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
                 y_pred_r = clf.predict(adv_ds_r.X)
             restart_label_results.append(y_pred_r)
 
-    if n_restarts > 0:
         bad_init_value = bad_init_indicator(y_real=y_real, y_pred=y_adv,
                                             y_adv=restart_label_results,
                                             y_target=y_target) if n_restarts is not None else False
@@ -218,7 +217,7 @@ def compute_indicators(attack, x, y, clf, transfer_clf=None,
     }
     if transfer_clf is not None:
         data.update({'Transfer Failure': transfer_failure, })
-    if n_restarts > 0:
+    if n_restarts is not None:
         data.update({'Bad Initialization': bad_init_value, })
     df = pd.DataFrame(data=data, index=[0])
 
